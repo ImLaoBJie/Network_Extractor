@@ -50,10 +50,6 @@ Exclusion = {'highway': ['motorway', 'trunk',
              'service': ['None'],
              }
 '''
-Access = list(Exclusion.keys())
-
-Encoding = 'UTF-8'
-
 # (lat, lon) in the data
 
 # bbox
@@ -62,3 +58,8 @@ Encoding = 'UTF-8'
 # Beijing, China
 Bbox_1 = [116.16, 39.74]
 Bbox_2 = [116.65, 40.10]
+
+Access = list(Exclusion.keys())
+
+Encoding = 'UTF-8'
+
