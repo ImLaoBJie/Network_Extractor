@@ -1,29 +1,29 @@
 
 
 # Network_Extractor
- 下载并提取特定路网节点
+ Download and extract specific elements from OSM to form a network
 
 ---
-# 开始之前
-1. 指定函数参数
+# Before running it
+1. Change the parameters of the functions
 - `download_map_file`：
-  - `Bbox_1`，`Bbox_2`指定需要提取的路网范围；
-  - `path`指定从OSM中下载未处理的原始地图文件的路径和文件名；
-  - 若地图文件已经下载过可以直接注释掉。
+  - `Bbox_1`，`Bbox_2` refer to the range of the whole network;
+  - `path` refers to the path and the name of the raw map file downloaded from the OSM;
+  - If you have downloaded the raw map file, you can skip the execution of this function.
 
 - `node2dat`：
-  - `source`指定刚才下载的原始地图文件路径和文件名；
-  - `output_nodes`指定储存所有目标范围内的节点信息的文件路径和文件名；
-  - `return`该函数会返回储存节点信息的变量。
+  - `source` refers to the path and name of the raw map file mentioned above;
+  - `output_nodes` refers to the output folder and name of the file storing all details of nodes within the range;
+  - `return` this function will return a variable strong the details of nodes.
 
 - `node_details`：
-  - `node_cors`读入`node2dat`函数返回的变量；
-  - `source`同上，指定刚才下载的原始地图文件路径和文件名；
-  - `output_links`指定储存有向图的文件路径和文件名；
-  - `output_map`指定示意图的导出路径和文件名；
-  - `exclude_unclassfied_point`(type: bool)是否排除没有指定类型的节点，OSM中存在少量unclassified的节点，如果为真，则排除这些节点，不存入文件。
+  - `node_cors` read the information from the variable created by `node2dat`;
+  - `source` see the `source` in the function `node2dat`;
+  - `output_links` refers to the output folder and name of the files saving the whole directed grapg;
+  - `output_map` refers to the output folder and name of the rough diagram of the network.
+  - `exclude_unclassfied_point`(type: bool) whether or not to exclude the nodes without tags，there are a few nodes marked as 'unclassified', if True, these points will not be saved in the file.
 
-在main.py中修改即可：
+These parameters can be modified in 'main.py':
 ```
 if __name__ == '__main__':
     downloaded_file_path = 'example/map.osm'
@@ -41,9 +41,9 @@ if __name__ == '__main__':
                                   exclude_unclassfied_point=True)
 ```
 
-2. 函数说明
- - `download_map_file`函数用于从OSM中下载未处理的原始地图文件，使用的API为[Overpass API](https://overpass-api.de/api/map?bbox=)，遵守[开放数据共享开放数据库许可协议](https://opendatacommons.org/licenses/odbl/1.0/)。`path`参数指定路径与文件名。
- - `node2dat`函数提取并储存所有目标范围内的节点信息，节点id升序排列，示例文件位于仓库中的`example/highway_output_nodes.dat`。以下是文件的部分详细内容，从左到右分别为节点id，纬度latitude，经度longitude，并以逗号作为间隔。此文件为方便读取并未设置header，可自行在第一行写入header，并修改扩展名转换为csv文件。
+2. The description of the functions
+ - `download_map_file` is used to download the raw map file from the OSM，The API used here is [Overpass API](https://overpass-api.de/api/map?bbox=). [Open Database License (ODbL) v1.0](https://opendatacommons.org/licenses/odbl/1.0/) must be followed.
+ - `node2dat` is used to extract all details of nodes within the specific range，the ids of nodes will be sorted in the ascending order，the example can be found in `example/highway_output_nodes.dat`. The following contents are the detailed info of the output file，There are id，latitude，longitude from the left to the right side, separated by commas. This output file does not contain headers，you can add the header and change the type of the file to tranform it to the CSV file.
  
 ```
 25248662,39.9062170,116.3912757
@@ -59,7 +59,7 @@ if __name__ == '__main__':
 25585067,39.9017740,116.3854246
 ```
  
- - `node_details`函数筛选符合的节点以及与之相连的其他节点,节点id升序排列，示例文件位于仓库中的`example/highway_output_links.dat`。以下是文件的部分详细内容，从左到右分别为节点id，纬度latitude，经度longitude，相连节点的id(node_0)，距离(dist_0)，相连节点的id(node_1)，距离(dist_1)......
+ - `node_details` will select the nodes satisfied the requirements and the related info od edges, the ids of nodes are sorted in the ascending order，the example can be founded in`example/highway_output_links.dat`. The following contents are the detailed info of the output files. From the left side to the right side，there are id，latitude，longitude, adjacently connected node's id(node_0)，distance(dist_0)，adjacently connected node's id(node_1)，distance(dist_1)......
  
 ```
 25585116,39.9005436,116.3778503,339290761,45.15116728717983,5077274184,98.02485049470219
@@ -71,57 +71,57 @@ if __name__ == '__main__':
 25585139,39.9022258,116.3815897,6795074474,40.8139009571648,25585135,22.70246815167011
 ```
 
-数据以有向图形式保存，比如节点0和节点1以双向道路连接，距离为100m，则有：
+The data will be saved in the form of directed graph. For example, the Node 0 and Node 1, are connected by a two-way road, and the distance between them is 100. This simple graph will be presented in the following form:
 
 ```
 0, lat_0, lon_0, 1, 100
 1, lat_1, lon_1, 0, 100
 ```
 
-如需修改为csv文件，操作同上。
+The operation of tranforming the output file to the CSV file is the sanme as that above.
 
-3. 修改config.py文件
-- `Exclusion`变量(type: dict)：
-  字典类型，字典键值keys()为需要提取的主要道路类型，键值对应内容为该主要道路类型中需要排除的次要道路类型，例如，当变量具有以下形式时：
+3. Modify `config.py`
+- `Exclusion` (type: dict)：
+  A Dictionary，The keys of it is the main tags/labels illustrating the kinds of roads need to be selected，the corresponding lists are the minor tags/labels illustrating the roads need to be excluded from the above roads had been selected. For example, when the `Exclusion` have the following value:
   ```
   Exclusion = {'highway': ['secondary_link', 'tertiary_link']
                }
   ```
-  等同于：
+  Equivalent to：
   
-  需要读取的主要道路类型（一级标签） | 需要排除的次要道路类型（二级标签）
+  The roads need to be selected（Major tags/labels） | The roads need to be further excluded（Minor tags/labels）
   ------------ | -------------
   highway | secondary_link, tertiary_link
   
-  此时，所有公路highway都会被提取，但是highway中包含的二级道路和三级道路会被排除。
+  In this case, all the roads with tag `highway` will be selected, but the roads with both tag `highway` and tag `secondary_link`/`tertiary_link` will be deleted.
   
-  详细的类型说明以及对应的标签名位于此处：[Key:highway](https://wiki.openstreetmap.org/wiki/Key:highway?uselang=zh-CN)
+  More details and description of details can be found in here：[Key:highway](https://wiki.openstreetmap.org/wiki/Key:highway?uselang=zh-CN)
   
-  config.py的注释中直接提供了两种路网类型的`Exclusion`变量示例，分别为公路网和自行车网络
+ The notes in `config.py` provide the two examples of the variable `Exclusion` (i.e. the typical highway network and the cycleway network seperately)
   
-- `Bbox_1`, `Bbox_2`变量(type: list)：
-  列表类型，形式为`Bbox_1 = [经度0, 纬度0]`，`Bbox_2 = [经度1, 纬度1]`，`Bbox_1`为左下角，`Bbox_2`为右上角，尽量保证`经度0>经度1`和`纬度0>纬度1`，否则可能会发生错误。你也可以直接在`download_map_file`直接给与`Bbox_1`, `Bbox_2`变量的值，无需修改此处。
+- `Bbox_1`, `Bbox_2` (type: list)：
+  List，The form of them is `Bbox_1 = [lon_0, lat_0]`，`Bbox_2 = [lon_1, lat_1]`，`Bbox_1` is the lower left corner of the range，`Bbox_2`is the upper right of that.Try to satisfy `lat_0<lat_1` and `lon_0<lon_1`, otherwise, the unknown errors may occur. Also, you can tranfer them directly to the parameters `Bbox_1`, `Bbox_2` in the function `download_map_file`, the effect is the same.
   
-  config.py中设置的原始值为北京市范围。
+  The original value of this 2 variables in `config.py` is the urban and suburban area of the Beijing, China.
   
-4. 特别注意：
- - OSM的坐标系统为WGS-84的基础上加入随机的偏移，而绝大多数在中国的在线地图服务采取GCJ-02坐标系统，因次OSM并不使用此坐标系统，在绘图时请勿使用经过该系统处理图像及数据，若要使用务必进行转换；
- - 根据中华人民共和国测绘法规定，国家对从事测绘活动的单位实行测绘资质管理制度，个人开展未经许可的测绘则为非法，因次OSM的坐标系统会在WGS-84的基础上加入随机的偏移；
- - 有时OSM并不会提供两点间距离，为保证有向图的正确构造，两点间距离将不使用OSM中提供的数据，而根据两点的坐标计算球面两点间距离，使用地球半径为6378.137km，并且两点间距离与OSM中提供的相差极小。
+4. Notice：
+ - The OSM add random changes when implement OSM projects within China to avoid ilegal issues. If you need to extract the info related to China, please be careful;
+ - The coordinate system used by OSM is WGS-48;
+ - Sometiems the OSM will not provide the distance between 2 nodes, the distance betwwen any 2 nodes will be calculated instead of using the values proveded by OSM, even though the values are not NAN values. The approch to realize this is to calculate the distance between 2 points on the surface of the sphere. The radius of EARTH is 6378.137km.
  
- # 开始
+ # Start
  ```
  python main.py
  ```
  
- # 运行效率
- 除下载文件的时间有较大变数外（与你的网络环境有关），大约40KM X 40KM的北京市路网导出会在10分钟以内完成（i7-9750H，导出`config.py`注释中的公路网示例只需大概20s），因次暂时无需实现并行，该示例的原始文件地图可从此处下载：[提取码:i4fh](https://pan.baidu.com/s/1y1iw_Ry7ZL-uQPz6C4p7wg)
+ # Efficiency
+ Apart from the uncertain time consumption on downloading the raw map file from OSM (it depends on your Internet Environment), the processing and extraction of a 40KM x 40KM map would be completed within 10 mins (when CPU is i7-9750H, generate the typical highway network mentioned in the example in `config.py` only consume 20 seconds), so the multiprocessing and parallelism are temporarily not considered. The raw map file  used in the demo can be downloaded from here (as an another source):[password:i4fh](https://pan.baidu.com/s/1y1iw_Ry7ZL-uQPz6C4p7wg)
  
  - [ ] TODO:multiprocessing
  
- # 结果示意
+ # Result
  
  ![HighwayNetwork](https://github.com/ImLaoBJie/Network_Extractor/blob/master/example/highway_map.png)
  
 
- 使用愉快:yum:
+ Enjoy it!:yum:
