@@ -79,7 +79,23 @@ if __name__ == '__main__':
 1, lat_1, lon_1, 0, 100
 ```
 
-如需修改为csv文件，操作同上。
+如果需要读取该文件，建议采用以下方式：
+```
+def load_from_file(graph: str):
+    file = open(graph, 'r')
+    edges = {}
+    coordinates = {}
+    for adjacency in file.readlines():
+        current_line = adjacency.split(',')
+        node_id = int(current_line[0])
+        iter_edges = {}
+        for index in np.arange(3, len(current_line), 2):
+           iter_edges[int(current_line[index])] = float(current_line[index + 1])
+
+        edges[node_id] = iter_edges
+
+        coordinate[node_id] = [float(current_line[1]), float(current_line[2])]
+```
 
 3. 修改config.py文件
 - `Exclusion`变量(type: dict)：
