@@ -78,7 +78,23 @@ The data will be saved in the form of directed graph. For example, the Node 0 an
 1, lat_1, lon_1, 0, 100
 ```
 
-The operation of tranforming the output file to the CSV file is the sanme as that above.
+If you want read this file and load it into memory, the following method is recommended:
+```
+def load_from_file(graph: str):
+    file = open(graph, 'r')
+    edges = {}
+    coordinates = {}
+    for adjacency in file.readlines():
+        current_line = adjacency.split(',')
+        node_id = int(current_line[0])
+        iter_edges = {}
+        for index in np.arange(3, len(current_line), 2):
+           iter_edges[int(current_line[index])] = float(current_line[index + 1])
+
+        edges[node_id] = iter_edges
+
+        coordinate[node_id] = [float(current_line[1]), float(current_line[2])]
+```
 
 3. Modify `config.py`
 - `Exclusion` (type: dict)：

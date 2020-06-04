@@ -79,7 +79,23 @@ if __name__ == '__main__':
 1, lat_1, lon_1, 0, 100
 ```
 
-如需修改为csv文件，操作同上。
+如果需要读取该文件，建议采用以下方式：
+```
+def load_from_file(graph: str):
+    file = open(graph, 'r')
+    edges = {}
+    coordinates = {}
+    for adjacency in file.readlines():
+        current_line = adjacency.split(',')
+        node_id = int(current_line[0])
+        iter_edges = {}
+        for index in np.arange(3, len(current_line), 2):
+           iter_edges[int(current_line[index])] = float(current_line[index + 1])
+
+        edges[node_id] = iter_edges
+
+        coordinate[node_id] = [float(current_line[1]), float(current_line[2])]
+```
 
 3. 修改config.py文件
 - `Exclusion`变量(type: dict)：
@@ -106,7 +122,7 @@ if __name__ == '__main__':
   config.py中设置的原始值为北京市范围。
   
 4. 特别注意：
- - OSM的坐标系统为WGS-84，而绝大多数在中国的在线地图服务采取GCJ-02坐标系统，因次OSM并不使用此坐标系统，在绘图时请勿使用经过该系统处理图像及数据，若要使用务必进行转换；
+ - OSM的坐标系统为WGS-84，而绝大多数在中国的在线地图服务采取GCJ-02坐标系统，因为OSM并不使用此坐标系统，在绘图时请勿使用经过该系统处理图像及数据，若要使用务必进行转换；
  - 根据中华人民共和国测绘法规定，国家对从事测绘活动的单位实行测绘资质管理制度，个人开展未经许可的测绘则为非法，因此OSM的坐标系统会在WGS-84的基础上加入随机的偏移；
  - 有时OSM并不会提供两点间距离，为保证有向图的正确构造，两点间距离将不使用OSM中提供的数据，而根据两点的坐标计算球面两点间距离，使用地球半径为6378.137km，并且两点间距离与OSM中提供的相差极小。
  
