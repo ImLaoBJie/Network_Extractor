@@ -205,12 +205,12 @@ def link2dat(node_cors: dict, source='map.osm', output_links='output_links.dat',
     root = tree.getroot()
 
     num_null = 0
-    num_links = 0
+    num_item = 0
     num_unqualified = 0
     for way in root.iter('way'):
         tag_recorder = None
 
-        num_links = num_links + 1
+        num_item = num_item + 1
         # exclude the links that the bicycles cannot go through
         if way.find('tag') is None:
             # most of the links of Type-missed can be used bu bikes
@@ -254,8 +254,8 @@ def link2dat(node_cors: dict, source='map.osm', output_links='output_links.dat',
             node_details[node_unit.first()].append([node_unit.second(), Distance.getDistance()])
             node_details[node_unit.second()].append([node_unit.first(), Distance.getDistance()])
 
-    print('Type-missed links/Total num of links: {}/{}'.format(num_null, num_links))
-    print('Acceptable links/Total num of links: {}/{}'.format(num_links - num_unqualified, num_links))
+    print('Type-missed items/Total num of items: {}/{}'.format(num_null, num_item))
+    print('Acceptable items/Total num of items: {}/{}'.format(num_item - num_unqualified, num_item))
 
     # remove alone point
     num_del = 0
@@ -275,9 +275,13 @@ def link2dat(node_cors: dict, source='map.osm', output_links='output_links.dat',
     DiGraph = nx.DiGraph()
     DiGraph.add_nodes_from(list(node_cors.keys()))
 
+    # The number of links
+    num_link = 0
     # write to file
     for node_id, contents in node_details.items():
         wait_to_write = [node_id, contents[0], contents[1]]
+
+        num_link = num_link + (len(contents) - 2)
         # The details of adjacencies start at index 2
         for index in range(2, len(contents)):
             wait_to_write.append(contents[index][0])
@@ -288,6 +292,7 @@ def link2dat(node_cors: dict, source='map.osm', output_links='output_links.dat',
         file_2.write('\n')
 
     file_2.close()
+    print('Total num of links: {}'.format(num_link))
 
     # (lat, lon) -> (lon, lat)
     for key in node_cors.keys():
